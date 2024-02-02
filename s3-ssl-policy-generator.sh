@@ -25,38 +25,37 @@ echo " " > ${clifilename}
 # Loop through each name in the file
 while IFS= read -r name; do
     # Create a file with the name and write contents to it in the specified directory
-    filename="${output_directory}/${name}_lifecycle_s3_policy.json"
+    filename="${output_directory}/${name}_s3_policy.json"
 
 
     # Generate a paragraph with variables
-      contents="{
-                      \"Rules\": [
-                        {
-                          \"ID\": \"LifeCycle-30-days-to-IA\",
-                          \"Status\": \"Enabled\",
-                          \"Prefix\": \"example/\",
-                          \"Transitions\": [
-                            {
-                              \"Days\": 30,
-                              \"StorageClass\": \"STANDARD_IA\"
+    contents="{
+                \"Version\": \"2012-10-17\",
+                \"Id\": \"SSLRulePolicy\",
+                \"Statement\": [
+                    {
+                        \"Sid\": \"AllowSSLRequestsOnly\",
+                        \"Effect\": \"Deny\",
+                        \"Principal\": \"*\",
+                        \"Action\": \"s3:*\",
+                        \"Resource\": [
+                            \"arn:aws:s3:::$name\",
+                            \"arn:aws:s3:::$name/*\"
+                        ],
+                        \"Condition\": {
+                            \"Bool\": {
+                                \"aws:SecureTransport\": \"false\"
                             }
-                          ]
-                          
                         }
-                      ]
-                }
-               "
+                    }
+                ]
+            }"
 
     echo "$contents" > "$filename"
     echo "File '$filename' created with contents."
 
 
-    #aws s3api put-bucket-lifecycle-configuration \
-    #--bucket <YourBucketName> \
-    #--lifecycle-configuration file://lifecycle-policy.json
-
-
-    clicontents=" aws s3api put-bucket-lifecycle-configuration --bucket ${name} --lifecycle-configuration file://${name}_lifecycle_s3_policy.json "
+    clicontents=" aws s3api put-bucket-policy --bucket ${name} --policy file://${name}_s3_policy.json "
 
     echo "$clicontents" >> "$clifilename"
 
