@@ -1,0 +1,6 @@
+bucket_name_1
+bucket_name_2
+bucket_name_3
+bucket_name_4
+bucket_name_5
+bucket_name_6
